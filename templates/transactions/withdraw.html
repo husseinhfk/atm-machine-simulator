@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ATM Withdrawal - ATM Machine Simulator</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark min-h-screen transition-colors duration-300">
+
+    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#f0f2f4] dark:border-white/10 px-2 md:px-10 py-3 bg-white dark:bg-background-dark/50 backdrop-blur-md">
+        <div class="flex items-center gap-2 md:gap-4 text-[#111318] dark:text-white">
+            <div class="size-6 text-primary">
+                <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z"
+                                fill="currentColor" fill-rule="evenodd"></path>
+                        </svg>
+            </div>
+            <h2 class="md:text-lg font-bold leading-tight tracking-[-0.015em]">ATM Machine Simulator</h2>
+        </div>
+        <div class="flex flex-1 justify-end gap-6 items-center">
+            <a href="{% url 'dashboard' %}"
+                class="flex md:min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-3 md:px-4 bg-blue-500 text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all">
+                <span class="truncate text-sm">Home</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center p-6 md:p-10 lg:p-12">
+        <div class="w-full max-w-[640px] space-y-10">
+
+            <!-- Title & Info -->
+            <div class="text-center space-y-3">
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-[#111318] dark:text-white">
+                    Cash Withdrawal
+                </h1>
+                <p class="text-[#616f89] dark:text-gray-400 text-lg">
+                    Select or enter the amount you wish to withdraw
+                </p>
+            </div>
+
+            <!-- Main Withdrawal Card -->
+            <div class="bg-white dark:bg-white/5 rounded-xl border border-transparent hover:border-primary/30 shadow-xl shadow-black/5 overflow-hidden transition-all duration-300">
+                
+                <!-- Limit Banner -->
+                <div class="bg-primary/5 dark:bg-primary/10 px-6 py-4 border-b border-primary/10 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                    <p class="text-sm font-medium text-primary dark:text-blue-300">
+                        Daily Withdrawal Limit: $1,000.00
+                    </p>
+                </div>
+
+                <div class="p-8 md:p-10">
+                    <form method="POST" action="{% url 'withdraw' %}" class="space-y-10">
+                        {% csrf_token %}
+
+                        <!-- Amount -->
+                        <div class="space-y-3">
+                            <label class="block text-[#111318] dark:text-white text-sm font-semibold tracking-wide uppercase">
+                                Withdrawal Amount
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400">$</span>
+                                <input name="amount"
+                                    value="{{ request.POST.amount }}"
+                                    class="w-full h-16 pl-12 pr-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 text-3xl font-extrabold text-primary transition-all outline-none"
+                                    placeholder="0.00" type="number" step="0.01" required />
+                            </div>
+
+                            <!-- Quick Amounts -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
+                                {% for amt in quick_amounts %}
+                                <button type="button"
+                                        onclick="document.querySelector('input[name=amount]').value='{{ amt }}'"
+                                        class="h-12 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-primary/10 hover:text-primary text-gray-700 dark:text-gray-300 font-medium transition-all">
+                                    ${{ amt }}
+                                </button>
+                                {% endfor %}
+                            </div>
+
+                            {% if messages %}
+                                <p class="text-red-600 dark:text-red-400 text-sm mt-2">
+                                    {% for message in messages %}{{ message }}{% endfor %}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- PIN -->
+                        <div class="space-y-3">
+                            <label class="block text-[#111318] dark:text-white text-sm font-semibold tracking-wide uppercase">
+                                4-Digit PIN
+                            </label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">lock</span>
+                                <input name="pin"
+                                    value="{{ request.POST.pin }}"
+                                    class="w-full h-16 pl-12 pr-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:border-primary focus:ring-2 focus:ring-primary/20 text-3xl tracking-[0.8em] font-bold transition-all outline-none"
+                                    maxlength="4" placeholder="••••" type="password" required />
+                            </div>
+                            <p class="text-xs text-[#616f89] dark:text-gray-400">
+                                For security reasons, never share your PIN.
+                            </p>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="pt-6 space-y-4">
+                            <button type="submit"
+                                class="w-full h-14 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 active:scale-[0.98] transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2 text-lg">
+                                Confirm Withdrawal
+                                <span class="material-symbols-outlined hidden md:block">trending_flat</span>
+                            </button>
+
+                            <a href="{% url 'dashboard' %}"
+                               class="w-full h-12 flex items-center justify-center rounded-lg border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold transition-all">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Features -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+                <div class="p-5 bg-white/60 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+                    <span class="material-symbols-outlined text-primary text-3xl mb-3 block">shield</span>
+                    <p class="font-semibold text-[#111318] dark:text-white">256-bit Encryption</p>
+                    <p class="text-xs text-[#616f89] dark:text-gray-400 mt-1">Your transaction is secure</p>
+                </div>
+                <div class="p-5 bg-white/60 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+                    <span class="material-symbols-outlined text-primary text-3xl mb-3 block">receipt_long</span>
+                    <p class="font-semibold text-[#111318] dark:text-white">Digital Receipt</p>
+                    <p class="text-xs text-[#616f89] dark:text-gray-400 mt-1">Available after completion</p>
+                </div>
+                <div class="p-5 bg-white/60 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+                    <span class="material-symbols-outlined text-primary text-3xl mb-3 block">support_agent</span>
+                    <p class="font-semibold text-[#111318] dark:text-white">24/7 Support</p>
+                    <p class="text-xs text-[#616f89] dark:text-gray-400 mt-1">We're here to help</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full py-4 text-center border-t border-gray-100 dark:border-white/5">
+        <p class="text-xs text-[#616f89] dark:text-gray-500 flex flex-col md:flex-row items-center justify-center gap-2 uppercase tracking-widest font-bold">
+            <span class="material-symbols-outlined text-green-500 text-xs">verified_user</span>
+            End-to-End Encrypted Secure Connection
+        </p>
+    </footer>
+
+</body>
+</html>
